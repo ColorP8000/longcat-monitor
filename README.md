@@ -1,83 +1,75 @@
-# LongCat API 监控工具
+# LongCat API 额度监控
 
-一个轻量级的 Electron 托盘应用，用于实时监控每日 LongCat API 的 Tokens 消耗情况。
+一个简单的桌面应用程序，用于监控 LongCat API 的剩余额度。
 
-## 功能特性
+## 功能特点
 
-- 🔄 **自动刷新** - 每 5 分钟自动更新数据
-- 📊 **实时显示** - 鼠标悬停即可查看详细信息
-- 💰 **额度追踪** - 显示已用额度、剩余额度和使用百分比
-- 🔔 **智能提醒** - 使用量超过 80% 时发送系统通知
-- 🎯 **轻量运行** - 仅在托盘中显示，不占用任务栏空间
+- 📊 实时显示总额度、已用额度、剩余额度
+- 📊 显示剩余百分比和进度条
+- 🔄 手动点击刷新按钮立即获取最新数据
+- ⏰ 自动刷新（5-10分钟随机间隔，防止账号风控）
+- 🎨 美观的深色主题界面
 
-## 安装要求
+## 安装使用
 
-- Node.js (v16+)
-- npm
-- [ccusage](https://github.com/ryoppippi/ccusage) - 已安装
-- Electron (项目依赖)
+### 方法一：直接运行（推荐）
 
-## 快速开始
+下载整个 `dist` 文件夹，双击 `LongCatMonitor.exe` 即可运行，无需安装任何依赖。
 
-1. 克隆或下载本项目
-2. 安装依赖：
-   ```bash
-   npm install
-   ```
-
-3. 准备托盘图标（可选）：
-   - 将 16x16 或 32x32 的 PNG 图标文件命名为 `tray-icon.png` 放在项目根目录
-   - 如果没有图标文件，会使用默认图标
-
-4. 启动应用：
-   ```bash
-   npm start
-   ```
-
-## 使用说明
-
-### 查看信息
-将鼠标悬停在托盘图标上，会显示：
-- 📊 今日已用 Tokens 数量
-- 💰 剩余额度
-- 📈 使用百分比
-
-### 右键菜单
-右键点击托盘图标，可以：
-- **刷新数据** - 立即更新使用量信息
-- **打开详细报告** - 在终端中打开 ccusage 的详细报告
-- **退出** - 关闭应用
-
-## 配置
-
-可以在 `main.js` 中修改以下配置：
-
-```javascript
-const DAILY_LIMIT = 5_000_000;  // 每日 Tokens 限额
-setInterval(updateTray, 5 * 60 * 1000);  // 刷新间隔（毫秒）
+文件夹结构：
+```
+dist/
+├── LongCatMonitor.exe  # 主程序
+├── .env                # 配置文件
+└── icon.ico            # 图标文件
 ```
 
-## 状态指示
+**注意：** 这三个文件必须放在同一个目录下，缺一不可。
 
-托盘图标会根据使用比例显示不同的状态颜色：
-- 🟢 绿色: 使用量 < 50%
-- 🟡 黄色: 50% ≤ 使用量 < 80%
-- 🔴 红色: 使用量 ≥ 80%
+### 方法二：从源码运行
 
-## 故障排查
+1. 确保已安装 Python 3.8+
+2. 安装依赖：
+   ```bash
+   pip install requests
+   ```
+3. 配置 `.env` 文件（见下方配置说明）
+4. 运行脚本：
+   ```bash
+   python LongCatMonitor.py
+   ```
 
-### 图标不显示
-- 确保 `tray-icon.png` 文件存在且格式正确
-- 尝试使用 16x16 或 32x32 的尺寸
+## 配置说明
 
-### 数据获取失败
-- 确保 `ccusage` 已正确安装并在 PATH 中
-- 运行 `ccusage daily --json` 手动测试
+### 1. 获取 Cookie
 
-### 应用无法启动
-- 检查 Node.js 版本是否 >= 16
-- 运行 `npm install` 确保所有依赖已安装
+1. 打开浏览器，登录 [LongCat 平台](https://longcat.chat/platform/usage)
+2. 按 F12 打开开发者工具
+3. 切换到 Network（网络）标签
+4. 刷新页面，点击任意一个请求
+5. 在 Request Headers 中找到 Cookie 字段
+6. 复制完整的 Cookie 值（通常是一长串文本）
 
-## 许可证
+**提示：** Cookie 通常由多个键值对组成（如 `a1=xxx; webId=xxx; ...`），需要将它们合并成一个完整的字符串。如果不确定如何操作，可以让 AI 工具帮你处理，例如：
 
-MIT
+> "请把以下 Cookie 片段合并成一个完整的字符串，用分号加空格分隔：a1=xxx, webId=xxx, ..."
+
+### 2. 填写配置
+
+打开 `.env` 文件，将合成的完整 Cookie 字符串粘贴到 `COOKIE_STR=` 后面：
+
+```
+COOKIE_STR=你合成的完整Cookie字符串
+BASE_USAGE_URL=https://longcat.chat/api/lc-platform/v1/tokenUsage
+```
+
+## 技术栈
+
+- Python 3
+- tkinter（GUI）
+- requests（HTTP 请求）
+- PyInstaller（打包）
+
+## License
+
+MIT License
